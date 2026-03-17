@@ -1,17 +1,16 @@
-# ASIA 2026: (E-) → ISNCSCI Imputation — 1st Place Solution
+# ASIA 2026: (E-) → ISNCSCI Imputation — 1st Place Solution (Task 1)
 
 **Competition:** [ASIA 2026 Kaggle Challenge](https://www.kaggle.com/competitions/asia-2026-e-isncsci-imputation)  
-**Author:** Anuj Saini  
-**Final Result:** 🥇 **Rank 1 on Private Leaderboard — Both Task 1 and Task 2**
+**Authors:** Sujata Sinha, Anuj Saini  
 
 ---
 
 ## Results
 
-| Task | Public LB | Private LB |
-|------|-----------|------------|
-| Task 1 — ISNCSCI Sensory Imputation | 0.40455 | Rank 1 |
-| Task 2 — ISNCSCI Sensory Imputation (w/ baseline) | 0.38327 | Rank 1 |
+| Task | Public LB | Private LB | Rank |
+|------|-----------|------------|------|
+| Task 1 — ISNCSCI Sensory Imputation | 0.40455 | TBD | 🥇 Rank 1 |
+| Task 2 — ISNCSCI Sensory Imputation (w/ baseline) | 0.38327 | TBD | Rank 2 |
 
 ---
 
@@ -21,8 +20,7 @@
 ├── task1/
 │   └── pipeline_ordinal_v3_advanced.py   ← Task 1 winning solution
 ├── task2/
-│   ├── pipeline_task2_v9_winning.py      ← Task 2 best (v6 + prob-space avg)
-│   └── pipeline_task2_v6.py              ← Task 2 runner-up (simpler, robust)
+│   └── pipeline_task2_v6.py              ← Task 2 best submission (0.38327)
 ├── requirements.txt
 └── README.md
 ```
@@ -39,7 +37,8 @@ The challenge requires predicting all 112 ISNCSCI sensory scores (0/1/2 ordinal 
 
 ## Task 1 — Winning Solution
 
-**File:** `task1/pipeline_ordinal_v3_advanced.py`
+**File:** `task1/pipeline_ordinal_v3_advanced.py`  
+**Public LB: 0.40455 — Rank 1**
 
 ### Key Innovations
 
@@ -93,15 +92,16 @@ Clip all probabilities to [0.001, 0.999] before averaging to prevent numerically
 
 ---
 
-## Task 2 — Winning Solution
+## Task 2 — Best Submission
 
-**File:** `task2/pipeline_task2_v9_winning.py`
+**File:** `task2/pipeline_task2_v6.py`  
+**Public LB: 0.38327 — Rank 2**
 
 ### Key Innovations
 
 **1. Training Data Augmentation (931 → 2114 rows)**
 
-The critical discovery: Task 1 and Task 2 share the same 931 patients. Task 1 contains additional rows for these patients at other timepoints, including:
+The critical discovery: Task 1 and Task 2 share the same 931 patients. Task 1 contains additional rows for these patients at other timepoints:
 
 | Source | Rows | Description |
 |--------|------|-------------|
@@ -116,22 +116,20 @@ All sources have 100% label fill rate and 100% w1_ baseline feature fill rate af
 
 **2. w1_ Baseline Features**
 
-Task 2 provides 134 w1_ (Week 1) full ISNCSCI baseline features with 0% NaN. These are joined onto all augmented rows via patient ID, making them the most predictive features.
+Task 2 provides 134 w1_ (Week 1) full ISNCSCI baseline features with 0% NaN. These are the most predictive features, joined onto all augmented rows via patient ID.
 
 **3. Ordinal Regression**
 
-Same binary decomposition as Task 1.
+Same binary decomposition as Task 1: P(≥1) + P(≥2) per target.
 
-**4. Probability-Space Reconstruction**
+### Task 2 Leaderboard Progression
 
-Store P(≥1) and P(≥2) separately across folds, clip to [0.001, 0.999], then reconstruct as their sum. This was the final improvement that pushed to rank 1.
-
-### Feature Engineering (223 features)
-
-- All 134 w1_ raw sensory features (0% NaN) — most important
-- w1_ motor aggregates and recovery deltas
-- w1_ injury level estimates
-- Current motor and time interaction features
+| Version | Key Change | Public LB |
+|---------|-----------|-----------|
+| v1 | w1_ features only | 0.40413 |
+| v4 | Augmentation 931→1607 | 0.39007 |
+| v5 | + Ordinal regression | 0.38568 |
+| **v6** | **+ Extended augmentation 1607→2114** | **0.38327** |
 
 ---
 
@@ -144,75 +142,78 @@ pip install -r requirements.txt
 
 ### Task 1
 ```bash
-# Place data files in working directory or update paths at top of script
 python task1/pipeline_ordinal_v3_advanced.py
 # Output: submission_ordinal_v3_advanced.csv
+# Runtime: ~4.5 hours on CPU (3 seeds)
 ```
 
 ### Task 2
 ```bash
-# Update Kaggle paths at top of script to match your dataset location
-python task2/pipeline_task2_v9_winning.py
-# Output: submission_task2_v9.csv
+# Update Kaggle dataset paths at top of script
+python task2/pipeline_task2_v6.py
+# Output: submission_task2_v6.csv
+# Runtime: ~90 minutes on CPU
 ```
 
 ### Data Paths (Kaggle)
 ```python
-# Task 2 script uses these paths — update if needed:
-"/kaggle/input/datasets/anujsaini1231/shared-task2/..."
-"/kaggle/input/datasets/anujsaini1231/shared-task1/..."
+# Update these at the top of each script:
+"/kaggle/input/datasets/kagglenamexxx/shared-task2/..."
+"/kaggle/input/datasets/kagglenamexxx/shared-task1/..."
 ```
 
 ---
 
 ## What Worked vs What Didn't
 
-### Worked ✅
-| Idea | LB Gain |
-|------|---------|
-| Ordinal regression (Task 1) | -0.026 |
-| Augmentation 931→2114 (Task 2) | -0.022 |
-| Ordinal regression (Task 2) | -0.004 |
-| Probability-space averaging | -0.002 |
-| Spatial smoothing (Task 1 only) | -0.002 |
-| Test patient augmentation (src_B, src_D) | -0.002 |
+### Worked 
 
-### Didn't Work ❌
+| Idea | Task | LB Gain |
+|------|------|---------|
+| Ordinal regression | Task 1 | -0.026 |
+| Augmentation 931→2114 | Task 2 | -0.022 |
+| Ordinal regression | Task 2 | -0.004 |
+| Probability-space seed averaging | Task 1 | -0.002 |
+| Anatomical spatial smoothing | Task 1 | -0.002 |
+| Extended augmentation (src_B,C,D) | Task 2 | -0.002 |
+
+### Didn't Work 
+
 - Label smoothing with regressors
 - Residual stacking (overfit)
-- Isotonic calibration (overfit)
+- Isotonic calibration (overfit to OOF)
 - Spatial smoothing on Task 2 (diverse patients)
 - Group-wise models (too few rows per group)
 - Neural networks (too few rows)
 - Prediction rounding
-- Seed averaging beyond 3 seeds (diminishing returns)
+- Seed averaging beyond 3 seeds
 
 ---
 
 ## Key Insights
 
-1. **Ordinal structure matters** — treating 0/1/2 as ordinal (not continuous) is the single most important modeling decision
+1. **Ordinal structure matters** — treating 0/1/2 as ordinal not continuous is the single most important modeling decision
 
-2. **Patient overlap is gold** — discovering Task 1 and Task 2 share 931 patients enabled +73% training data augmentation
+2. **Patient overlap is gold** — Task 1 and Task 2 share 931 patients, enabling +127% training data augmentation for Task 2
 
-3. **CV ≠ LB for Task 2** — strong distribution shift means CV improvements don't reliably translate to LB. More data consistently helped LB even when it hurt CV
+3. **CV ≠ LB for Task 2** — distribution shift means CV improvements don't reliably predict LB. More data helped LB even when it hurt CV
 
-4. **Probability-space averaging beats prediction-space** — averaging P(≥1) and P(≥2) separately before summing preserves ordinal calibration
+4. **Probability-space averaging** — averaging P(≥1) and P(≥2) separately before summing preserves ordinal calibration
 
-5. **Spatial anatomy helps Task 1** — single test patient follows smooth anatomical gradient; diverse Task 2 test patients do not
+5. **Spatial anatomy helps Task 1 only** — single test patient follows smooth gradient; 252 diverse Task 2 test patients do not
+
+6. **Test patient data helps** — including Task 1 training rows for Task 2 test patients improves test distribution alignment without label leakage
 
 ---
 
 ## Citation
 
-If you use this code, please cite:
-
-```
-@misc{saini2026isncsci,
-  author = {Anuj Saini},
+```bibtex
+@misc{sinha2026isncsci,
+  author = {Sujata Sinha and Anuj Saini},
   title  = {First Place Solution: ASIA 2026 (E-) → ISNCSCI Imputation Challenge},
   year   = {2026},
-  url    = {https://github.com/anujsaini/asia-2026-isncsci}
+  url    = {https://github.com/anujsainimca/asia-2026-isncsci-solution}
 }
 ```
 
@@ -220,6 +221,5 @@ If you use this code, please cite:
 
 ## Contact
 
-Anuj Saini  
-Kaggle: anujsaini1231  
-Competition: ASIA 2026 Kaggle Challenge
+Sujata Sinha, Anuj Saini  mca  
+Competition: [ASIA 2026 Kaggle Challenge](https://www.kaggle.com/competitions/asia-2026-e-isncsci-imputation)
