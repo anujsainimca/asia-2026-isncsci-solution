@@ -1,0 +1,11 @@
+*.csv
+*.npy
+*.pkl
+*.joblib
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.egg-info/
+dist/
+build/
+.env
