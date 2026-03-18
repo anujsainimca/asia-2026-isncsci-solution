@@ -221,5 +221,6 @@ python task2/pipeline_task2_v6.py
 
 ## Contact
 
-Sujata Sinha, Anuj Saini  mca  
+Sujata Sinha, Anuj Saini
+email: sujata.sinha@umontreal.ca
 Competition: [ASIA 2026 Kaggle Challenge](https://www.kaggle.com/competitions/asia-2026-e-isncsci-imputation)
